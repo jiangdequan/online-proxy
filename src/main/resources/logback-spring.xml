@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="10 seconds">
+
+    <property name="HTTP_PROXY_LOG_DIR" value="/javahub/proxy" />
+
+    <!-- http_proxy.log logger Appender -->
+    <appender name="ErrorRootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <!-- 过滤器，只记录 error 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>
+        <file>${HTTP_PROXY_LOG_DIR}/http_error.log</file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_error.%i.%d{yyyy-MM-dd}.log.zip
+            </fileNamePattern>
+            <maxFileSize>200MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>--|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- http_proxy.log logger Appender -->
+    <appender name="RootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HTTP_PROXY_LOG_DIR}/http_proxy.log</file>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_proxy.%i.%d{yyyy-MM-dd}.log.zip
+            </fileNamePattern>
+            <maxFileSize>200MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>--|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>--|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread]%logger{60}-%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.apache" level="WARN" />
+    <logger name="httpclient" level="WARN" />
+    <!-- Root Logger -->
+    <root level="INFO">
+        <appender-ref ref="ErrorRootDailyAndSizeRollAppender"/>
+        <appender-ref ref="consoleAppender"/>
+    </root>
+
+</configuration>
