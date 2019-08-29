@@ -3,40 +3,40 @@
 
     <property name="HTTP_PROXY_LOG_DIR" value="/javahub/proxy" />
 
-    <!-- http_proxy.log logger Appender -->
-    <appender name="ErrorRootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <append>true</append>
-        <!-- 过滤器，只记录 error 级别的日志 -->
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>error</level>
-        </filter>
-        <file>${HTTP_PROXY_LOG_DIR}/http_error.log</file>
-        <rollingPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_error.%i.%d{yyyy-MM-dd}.log.zip
-            </fileNamePattern>
-            <maxFileSize>200MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>--|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>
-        </encoder>
-    </appender>
+    <!--&lt;!&ndash; http_proxy.log logger Appender &ndash;&gt;-->
+    <!--<appender name="ErrorRootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--<append>true</append>-->
+        <!--&lt;!&ndash; 过滤器，只记录 error 级别的日志 &ndash;&gt;-->
+        <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+            <!--<level>error</level>-->
+        <!--</filter>-->
+        <!--<file>${HTTP_PROXY_LOG_DIR}/http_error.log</file>-->
+        <!--<rollingPolicy-->
+                <!--class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+            <!--<fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_error.%i.%d{yyyy-MM-dd}.log.zip-->
+            <!--</fileNamePattern>-->
+            <!--<maxFileSize>200MB</maxFileSize>-->
+            <!--<maxHistory>30</maxHistory>-->
+        <!--</rollingPolicy>-->
+        <!--<encoder>-->
+            <!--<pattern>&#45;&#45;|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
 
-    <!-- http_proxy.log logger Appender -->
-    <appender name="RootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${HTTP_PROXY_LOG_DIR}/http_proxy.log</file>
-        <rollingPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_proxy.%i.%d{yyyy-MM-dd}.log.zip
-            </fileNamePattern>
-            <maxFileSize>200MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>--|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>
-        </encoder>
-    </appender>
+    <!--&lt;!&ndash; http_proxy.log logger Appender &ndash;&gt;-->
+    <!--<appender name="RootDailyAndSizeRollAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--<file>${HTTP_PROXY_LOG_DIR}/http_proxy.log</file>-->
+        <!--<rollingPolicy-->
+                <!--class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+            <!--<fileNamePattern>${HTTP_PROXY_LOG_DIR}/%d{yyyy/MM,aux}/http_proxy.%i.%d{yyyy-MM-dd}.log.zip-->
+            <!--</fileNamePattern>-->
+            <!--<maxFileSize>200MB</maxFileSize>-->
+            <!--<maxHistory>30</maxHistory>-->
+        <!--</rollingPolicy>-->
+        <!--<encoder>-->
+            <!--<pattern>&#45;&#45;|%X{TraceID}|%X{hostIP}|%date{yyyy-MM-dd HH:mm:ss}[%level][%thread][%logger]-%msg%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
 
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
