@@ -48,7 +48,7 @@
     <logger name="httpclient" level="WARN" />
     <!-- Root Logger -->
     <root level="INFO">
-        <appender-ref ref="ErrorRootDailyAndSizeRollAppender"/>
+        <!--<appender-ref ref="ErrorRootDailyAndSizeRollAppender"/>-->
         <appender-ref ref="consoleAppender"/>
     </root>
 
