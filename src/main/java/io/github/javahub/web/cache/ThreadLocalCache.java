@@ -1,15 +1,5 @@
 package io.github.javahub.web.cache;
 
-/**
- * ProjectName: Kosan
- * <p>
- *
- * <p>
- *
- * @author jiangdq
- * <p>
- * @date 2019-08-21 08:37
- */
 public class ThreadLocalCache {
     private static final ThreadLocal<byte[]> INJECT_HTML = new ThreadLocal<>();
     private static final ThreadLocal<String> HOSTS = new ThreadLocal<>();

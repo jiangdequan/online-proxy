@@ -1,8 +1,6 @@
 package io.github.javahub.web.common;
 
 import io.github.javahub.web.cache.ThreadLocalCache;
-import io.github.javahub.web.controller.proxy.OnlineProxyController;
-import io.github.javahub.web.util.IoUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -37,13 +35,15 @@ import java.net.URI;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ReverseProxy {
+public class ReverseProxy2 {
 
     /**
      * Logger
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReverseProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReverseProxy2.class);
 
     /**
      * User agents shouldn't send the url fragment but what if it does?
@@ -58,7 +58,26 @@ public class ReverseProxy {
 
     private HttpClient proxyClient = createHttpClient();
 
+    private Map<String, String> originalHeaders = new HashMap<>();
+
+    private Map<String, String> modifiedHeaders = new HashMap<>();
+
     public void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Exception {
+        Enumeration<String> headerNames = servletRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String name = headerNames.nextElement();
+            String value = servletRequest.getHeader(name);
+            // modified header
+            if (StringUtils.startsWith(name, "--")) {
+                name = StringUtils.replace(name, "--", "");
+                modifiedHeaders.put(name, value);
+            } else {
+                // original header
+                originalHeaders.put(name, value);
+            }
+            System.out.println(name + ": " + value);
+        }
+        // request method
         String method = servletRequest.getMethod();
         String proxyRequestUri = rewriteUrlFromRequest(servletRequest);
         LOGGER.info("proxyRequestUri from method rewriteUrlFromRequest: " + proxyRequestUri);
@@ -175,7 +194,7 @@ public class ReverseProxy {
         HttpEntity entity = proxyResponse.getEntity();
         if (entity != null) {
             OutputStream servletOutputStream = servletResponse.getOutputStream();
-            injectHtml(proxyResponse, servletOutputStream);
+//            injectHtml(proxyResponse, servletOutputStream);
             entity.writeTo(servletOutputStream);
         }
     }
@@ -278,7 +297,7 @@ public class ReverseProxy {
 
     /**
      * Sub-classes can override specific behaviour of
-     * {@link org.apache.http.client.config.RequestConfig}.
+     * {@link RequestConfig}.
      */
     protected RequestConfig buildRequestConfig() {
         // we handle them in the servlet instead
@@ -288,7 +307,7 @@ public class ReverseProxy {
 
     /**
      * Sub-classes can override specific behaviour of
-     * {@link org.apache.http.config.SocketConfig}.
+     * {@link SocketConfig}.
      */
     protected SocketConfig buildSocketConfig() {
 
@@ -537,24 +556,25 @@ public class ReverseProxy {
      * @return
      */
     protected String getTargetUri(HttpServletRequest servletRequest) {
-        String requestUri = servletRequest.getRequestURI();
-        if (StringUtils.startsWith(requestUri, "/-----")) {
-            requestUri = StringUtils.replace(requestUri, "/-----", "");
-        }
-        if (!StringUtils.containsIgnoreCase(requestUri, OnlineProxyController.domain)) {
-            return requestUri;
-        }
-        requestUri = servletRequest.getHeader("referer");
-        int startIndex = -1;
-        if (StringUtils.isNotBlank(requestUri) && -1 != (startIndex = StringUtils.indexOf(requestUri, "/-----"))) {
-            return StringUtils.substring(requestUri, startIndex + 6);
-        }
-        return null;
+        return modifiedHeaders.get("url");
+//        String requestUri = servletRequest.getRequestURI();
+//        if (StringUtils.startsWith(requestUri, "/-----")) {
+//            requestUri = StringUtils.replace(requestUri, "/-----", "");
+//        }
+//        if (!StringUtils.containsIgnoreCase(requestUri, OnlineProxyController.domain)) {
+//            return requestUri;
+//        }
+//        requestUri = servletRequest.getHeader("referer");
+//        int startIndex = -1;
+//        if (StringUtils.isNotBlank(requestUri) && -1 != (startIndex = StringUtils.indexOf(requestUri, "/-----"))) {
+//            return StringUtils.substring(requestUri, startIndex + 6);
+//        }
+//        return null;
     }
 
     /**
      * Allow overrides of
-     * {@link javax.servlet.http.HttpServletRequest#getPathInfo()}. Useful when
+     * {@link HttpServletRequest#getPathInfo()}. Useful when
      * url-pattern of servlet-mapping (web.xml) requires manipulation.
      */
     protected String rewritePathInfoFromRequest(HttpServletRequest servletRequest) {
@@ -652,70 +672,5 @@ public class ReverseProxy {
         for (String header : headers) {
             hopByHopHeaders.addHeader(new BasicHeader(header, null));
         }
-    }
-
-    public void injectHtml(HttpResponse httpResponse, OutputStream servletOutputStream) {
-        // content type
-        Header[] headers = httpResponse.getHeaders("Content-Type");
-        if (null == headers || 0 == headers.length) {
-            return;
-        }
-        boolean injectFlag = false;
-        for (Header header : headers) {
-            // if response content is html, need inject
-            if (StringUtils.containsIgnoreCase(header.getValue(), "text/html")) {
-                injectFlag = true;
-                break;
-            }
-        }
-        if (!injectFlag) {
-            return;
-        }
-
-        byte[] htmlBytes = ThreadLocalCache.getHtml();
-        // content encoding
-        headers = httpResponse.getHeaders("Content-Encoding");
-        if (null != headers && 0 < headers.length) {
-            for (Header header : headers) {
-                // gzip
-                if (StringUtils.equalsIgnoreCase(header.getValue(), "gzip")) {
-                    htmlBytes = IoUtils.gzip(htmlBytes);
-                    break;
-                }
-            }
-        }
-
-//        headers = httpResponse.getHeaders("Transfer-Encoding");
-//        if (null != headers && 0 < headers.length) {
-//            for (Header header : headers) {
-//                if (StringUtils.equalsIgnoreCase(header.getValue(), "chunked")) {
-//                    String sizeStr = Integer.toHexString(htmlBytes.length) + "\r\n";
-//                    byte[] sizeBytes = sizeStr.getBytes(Charset.forName("UTF-8"));
-//                    htmlBytes = plus(sizeBytes, htmlBytes);
-//                    break;
-//                }
-//            }
-//        }
-
-        writeInjectHtml(servletOutputStream, htmlBytes);
-    }
-
-    public void writeInjectHtml(OutputStream outputStream, byte[] htmlBytes) {
-        try {
-            outputStream.write(htmlBytes);
-        } catch (Exception e) {
-            LOGGER.error("writeInjectHtml error", e);
-        }
-    }
-
-    public byte[] plus(byte[] firstBytes, byte[] secondBytes) {
-        byte[] totalBytes = new byte[firstBytes.length + secondBytes.length];
-        for (int i = 0, len = firstBytes.length; i < len; i++) {
-            totalBytes[i] = firstBytes[i];
-        }
-        for (int j = 0, len = secondBytes.length; j < len; j++) {
-            totalBytes[j + firstBytes.length] = secondBytes[j];
-        }
-        return totalBytes;
     }
 }

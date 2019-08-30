@@ -9,16 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * ProjectName: Kosan
- * <p>
- *
- * <p>
- *
- * @author jiangdq
- * <p>
- * @date 2019-08-04 00:10
- */
 public class InputStreamCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InputStreamCache.class);
